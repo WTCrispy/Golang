@@ -8,9 +8,11 @@ import (
 const VERSION = "1.0"
 
 func main() {
-	var version = flag.Bool("version", true, "Version prog")
-	fmt.Println("Hello World")
+	var version = flag.Bool("version", false, "Version prog")
+	flag.Parse()
 	if *version == true {
 		fmt.Println(VERSION)
-	}
+	}else {
+fmt.Println("Hello World")
+}
 }
