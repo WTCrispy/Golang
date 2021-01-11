@@ -12,7 +12,7 @@ func main() {
 	flag.Parse()
 	if *version == true {
 		fmt.Println(VERSION)
-	}else {
-fmt.Println("Hello World")
-}
+	} else {
+		fmt.Println("Hello World")
+	}
 }
