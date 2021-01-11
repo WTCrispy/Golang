@@ -1,1 +1,1 @@
-module img_diff
+module img_diff.go
