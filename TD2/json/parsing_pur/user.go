@@ -1,25 +1,25 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-"encoding/json"
 )
 
 func main() {
-var jsonBlob = []byte(
-`[
-{"Login": "Paul","Password": "Pass123"},
-{"Login": "Jacques","Password": "Jacquouille123"}
-]`)
-var users []User
-err := json.Unmarshal(jsonBlob, &users)
-if err != nil {
-fmt.Println("error:", err)
-}
-fmt.Printf("%+v", users)
+
+	group := User{
+		Login:    "Paul",
+		Password: "Pass123",
+	}
+	b, err := json.Marshal(group)
+	if err != nil {
+		fmt.Println("error:", err)
+	}
+
+	fmt.Println(string(b))
 }
 
 type User struct {
-Login string
-Password string
+	Login    string `json:"userName"`
+	Password string
 }
