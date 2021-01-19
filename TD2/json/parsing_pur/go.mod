@@ -1,1 +1,3 @@
-module user.go
+module main
+
+go 1.13
