@@ -1,1 +1,3 @@
-module maFonction.go
+module main
+
+go 1.13
