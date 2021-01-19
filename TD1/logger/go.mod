@@ -1,1 +1,3 @@
-module logger_stderr.go
+module main
+
+go 1.13
