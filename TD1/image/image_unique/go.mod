@@ -1,1 +1,3 @@
-module img_diff.go
+module main
+
+go 1.13
