@@ -1,1 +1,3 @@
-module url_internet.go
+module main
+
+go 1.13

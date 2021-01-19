@@ -3,29 +3,20 @@ package main
 import (
 	"fmt"
 	"flag"
-	"time"
 	"strings"
 	"net/http"
 	"log"
 	"strconv"
 	"io/ioutil"
+	//"os"
 )
 
-func time() {
-    start := time.Now()
-
-    r := new(big.Int)
-    fmt.Println(r.Binomial(1000, 10))
-
-    elapsed := time.Since(start)
-    log.Printf("Binomial took %s", elapsed)
-}
-
 func main(){
-	url := flag.String("url", "", "list of urls")
+	// default_url = "http:url1.tld,http://url2.tld"
+	urls := flag.String("urls", "", "list of urls")
 	flag.Parse()
-	if *url != "" {
-		list_url := strings.Split(*url,",")
+	if *urls != "" {
+		list_url := strings.Split(*urls,",")
 		for index, element := range list_url {
 			fmt.Println(element)
 			resp, err := http.Get(element)
