@@ -2,65 +2,100 @@ package main
 
 import (
 	"fmt"
-	"log"
-	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 )
 
-func main() {
-
-	h1 := func(rw http.ResponseWriter, _ *http.Request) {
-		fmt.Println("/")
-		return
-	}
-
-	http.HandleFunc("/", h1)
-
-	h2 := func(w http.ResponseWriter, _ *http.Request) {
-		fmt.Println("/done")
-		return
-	}
-
-	http.HandleFunc("/done", h2)
-
-	h3 := func(w http.ResponseWriter, _ *http.Request) {
-		fmt.Println("/add")
-		return
-	}
-
-	http.HandleFunc("/add", h3)
-
-	log.Fatal(http.ListenAndServe(":8000", nil))
-}
-
-var task []Task
+var tasks []Task
 
 type Task struct {
-	Description string `json:"desc"`
-
-	Done bool `json:"done"`
+	Description string
+	Done        bool
 }
 
-type List struct {
-	ID string `json:"id"`
-	Task string `json:"task"`
+func (t Task) String() string {
+	return fmt.Sprintf("%s", t.Description)
+}
+
+func main() {
+	http.HandleFunc("/", list)
+	http.HandleFunc("/done", done)
+	http.HandleFunc("/add", add)
+
+	http.ListenAndServe(":8080", nil)
 }
 
 func list(rw http.ResponseWriter, _ *http.Request) {
-	list := []List{}
-	task = []Task{
-		{"Faire les courses", false},
-		{"Payer les factures", false},
-	}
-	for id, i := range task {
-		if !i.Done {
-			list = append(list, List{strconv.Itoa(id), i.Description})
+	response := ""
+
+	for i, elt := range tasks {
+		if !elt.Done {
+			response = fmt.Sprintf("%s\nID:%d, task: %s", response, i, elt.String())
 		}
 	}
-	rw.WriteHeader(http.StatusOK)
-	data, _ := json.Marshal(list)
 
-	rw.Write(data)
-	return
+	rw.WriteHeader(http.StatusOK)
+	_, err := rw.Write([]byte(response))
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+
+func done(rw http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet: // List all done tasks
+		res := ""
+		for i, elt := range tasks {
+			if elt.Done {
+				res = fmt.Sprintf("%s\nID: %d task: %s", res, i, elt)
+			}
+		}
+
+		rw.WriteHeader(http.StatusOK)
+		rw.Write([]byte(res))
+
+	case http.MethodPost: // Set a task to done
+		data, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			rw.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		strData := string(data)
+		id, err := strconv.Atoi(strData)
+		if err != nil {
+			rw.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		tasks[id].Done = true
+		rw.WriteHeader(http.StatusOK)
+
+	default:
+		rw.WriteHeader(http.StatusBadRequest)
+	}
+}
+
+func add(rw http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		rw.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		fmt.Printf("Error reading body: %v", err)
+		http.Error(
+			rw,
+			"can't read body", http.StatusBadRequest,
+		)
+		return
+	}
+
+	t := Task{
+		Description: string(body),
+	}
+
+	tasks = append(tasks, t)
+
+	rw.WriteHeader(http.StatusOK)
 }
